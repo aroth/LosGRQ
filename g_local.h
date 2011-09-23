@@ -960,7 +960,13 @@ struct gclient_s
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
 
+	// aroth
 	int			cash_in_hand;
+
+	int			cash_20s;
+	int			cash_10s;
+	int			cash_5s;
+	int			cash_1s;
 	
 };
 
@@ -1118,3 +1124,4 @@ struct edict_s
 void Cmd_CashOut( edict_t *ent );
 void Cmd_Cashbox( edict_t *ent );
 void Cmd_GiveCash( edict_t *ent ); // debug
+void makeChange( edict_t *ent );

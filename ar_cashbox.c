@@ -100,17 +100,20 @@ void Cmd_Cashbox( edict_t *ent ){
 
 void Cmd_GiveCash( edict_t *ent ){
 	if( ent->client ){
-		ent->client->cash_in_hand += 10;
+		ent->client->cash_in_hand += 13;
+		makeChange( ent );
 	}
 }
 
 void Cmd_CashOut( edict_t *ent ){
+
+	vec3_t a;
 	int i=0;
 	int count = ent->client->cash_in_hand;
 
-	vec3_t a;
-
 	VectorCopy( ent->client->v_angle, a );
+	
+	makeChange( ent );
 
 	for( i=0; i<count; i++ ){
 		gitem_t *it = FindItem("Coin $1");
@@ -141,4 +144,32 @@ void Cmd_CashOut( edict_t *ent ){
 
 		gi.linkentity (coin);
 	}
+}
+
+void makeChange( edict_t *ent ){
+	int cash = ent->client->cash_in_hand;
+
+	int c20 = 0;
+	int c10 = 0;
+	int c5  = 0;
+	int c1  = 0;
+
+	c20 = floor( cash / 20 );
+	cash -= (c20 * 20);
+
+	c10 = floor( cash / 10 );
+	cash -= (c10 * 10);
+
+	c5  = floor( cash / 5 );
+	cash -= (c5 * 5);
+
+	c1  = floor( cash / 1 );
+	cash -= (c1 * 1);
+	
+	ent->client->cash_20s = c20;
+	ent->client->cash_10s = c10;
+	ent->client->cash_5s = c5;
+	ent->client->cash_1s = c1;
+
+	gi.dprintf("%d 20s, %d 10s, %d 5s, %d 1s\n", c20, c10, c5, c1);
 }
