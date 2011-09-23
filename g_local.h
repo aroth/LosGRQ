@@ -92,7 +92,8 @@ typedef enum
 {
 	COIN_1,
 	COIN_5,
-	COIN_10
+	COIN_10,
+	COIN_25
 } coin_t;
 
 //deadflag
@@ -963,7 +964,7 @@ struct gclient_s
 	// aroth
 	int			cash_in_hand;
 
-	int			cash_20s;
+	int			cash_25s;
 	int			cash_10s;
 	int			cash_5s;
 	int			cash_1s;

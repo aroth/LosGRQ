@@ -21,8 +21,17 @@ void cashbox_think( edict_t *ent ){
 void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf){
 	if( other->client ){
 		gi.sound(ent, CHAN_ITEM, gi.soundindex("coin/chching1.wav"), 1, ATTN_NORM, 0);
-		other->client->cash_in_hand += 1;
+
+		if( Q_stricmp( ent->classname, "coin_1" ) == 0 )
+			other->client->cash_in_hand += 1;
+		else if( Q_stricmp( ent->classname, "coin_5" ) == 0 )
+			other->client->cash_in_hand += 5;
+		else if( Q_stricmp( ent->classname, "coin_10" ) == 0 )
+			other->client->cash_in_hand += 10;
+		else if( Q_stricmp( ent->classname, "coin_25" ) == 0 )
+			other->client->cash_in_hand += 25;
 		
+
 		// aroth: this will be too frequent if there are a lot of coins. ok for now.
 		if( ent->owner == other ){
 			gi.bprintf(PRINT_MEDIUM, "%s recovered his own cash.\n", other->client->pers.netname);
@@ -47,7 +56,6 @@ void Cmd_Cashbox( edict_t *ent ){
 	if( client->resp.has_cashbox == true ){
 		
 		vec3_t forward, right, offset;	
-		trace_t tr;
 
 		edict_t *cashbox = G_Spawn();
 
@@ -105,18 +113,7 @@ void Cmd_GiveCash( edict_t *ent ){
 	}
 }
 
-void Cmd_CashOut( edict_t *ent ){
-
-	vec3_t a;
-	int i=0;
-	int count = ent->client->cash_in_hand;
-
-	VectorCopy( ent->client->v_angle, a );
-	
-	makeChange( ent );
-
-	for( i=0; i<count; i++ ){
-		gitem_t *it = FindItem("Coin $1");
+void throw_cash( edict_t *ent, gitem_t *it, vec3_t angle ){
 		edict_t *coin = G_Spawn();
 		vec3_t forward, right, offset;
 
@@ -136,26 +133,80 @@ void Cmd_CashOut( edict_t *ent ){
 		coin->touch = coin_touch;
 		coin->owner = ent;
 
-		a[1] += (360 / count);
-
-		AngleVectors(a, forward, right, NULL);
+		AngleVectors(angle, forward, right, NULL);
 		VectorSet( offset, 0, 48, 48 );
 		G_ProjectSource( ent->s.origin, offset, forward, right, coin->s.origin);
 
 		gi.linkentity (coin);
-	}
 }
+
+void Cmd_CashOut( edict_t *ent ){
+
+	vec3_t a;
+	int i;
+	int total_change = 0;
+	int count = ent->client->cash_in_hand;
+
+	VectorCopy( ent->client->v_angle, a );
+	
+	makeChange( ent );
+
+	total_change += ent->client->cash_25s;
+	total_change += ent->client->cash_10s;
+	total_change += ent->client->cash_5s;
+	total_change += ent->client->cash_1s;
+
+	gi.dprintf("TOTAL CHANGE = %d\n", total_change);
+
+	// spit out 25s
+	for( i=0; i<ent->client->cash_25s; i++ ){
+		gitem_t *it = FindItem("Coin $25");
+		a[1] += (360 / total_change);
+		throw_cash( ent, it, a );
+		ent->client->cash_in_hand -= 25;
+	}
+
+	// spit out 10s
+	for( i=0; i<ent->client->cash_10s; i++ ){
+		gitem_t *it = FindItem("Coin $10");
+		a[1] += (360 / total_change);
+		throw_cash( ent, it, a );
+		ent->client->cash_in_hand -= 10;
+	}
+
+	// spit out 5s
+	for( i=0; i<ent->client->cash_5s; i++ ){
+		gitem_t *it = FindItem("Coin $5");
+		a[1] += (360 / total_change);
+		throw_cash( ent, it, a );
+		ent->client->cash_in_hand -= 5;
+	}
+
+	// spit out 1s
+	for( i=0; i<ent->client->cash_1s; i++ ){
+		gitem_t *it = FindItem("Coin $1");
+		a[1] += (360 / total_change);
+		throw_cash( ent, it, a );
+		ent->client->cash_in_hand -= 1;
+	}
+
+
+
+
+}
+
+
 
 void makeChange( edict_t *ent ){
 	int cash = ent->client->cash_in_hand;
 
-	int c20 = 0;
+	int c25 = 0;
 	int c10 = 0;
 	int c5  = 0;
 	int c1  = 0;
 
-	c20 = floor( cash / 20 );
-	cash -= (c20 * 20);
+	c25 = floor( cash / 25 );
+	cash -= (c25 * 25);
 
 	c10 = floor( cash / 10 );
 	cash -= (c10 * 10);
@@ -166,10 +217,10 @@ void makeChange( edict_t *ent ){
 	c1  = floor( cash / 1 );
 	cash -= (c1 * 1);
 	
-	ent->client->cash_20s = c20;
+	ent->client->cash_25s = c25;
 	ent->client->cash_10s = c10;
 	ent->client->cash_5s = c5;
 	ent->client->cash_1s = c1;
 
-	gi.dprintf("%d 20s, %d 10s, %d 5s, %d 1s\n", c20, c10, c5, c1);
+	gi.dprintf("%d 25s, %d 10s, %d 5s, %d 1s\n", c25, c10, c5, c1);
 }

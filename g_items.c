@@ -1544,6 +1544,77 @@ always owned, never in the world
 		COIN_1,
 /* precache */ ""
 	},
+	{
+		"coin_5",
+		NULL, // pickup
+		NULL,
+		NULL, // drop
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/coin_005/tris.md2", EF_ROTATE, 
+		NULL,
+/* icon */		"a_shells",
+/* pickup */	"Coin $5",
+/* width */		3,
+		10,
+		NULL,
+		IT_COIN,
+		0,
+		NULL,
+		COIN_5,
+/* precache */ ""
+	},
+	{
+		"coin_10",
+		NULL, // pickup
+		NULL,
+		NULL, // drop
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/coin_010/tris.md2", EF_ROTATE, 
+		NULL,
+/* icon */		"a_shells",
+/* pickup */	"Coin $10",
+/* width */		3,
+		10,
+		NULL,
+		IT_COIN,
+		0,
+		NULL,
+		COIN_10,
+/* precache */ ""
+	},
+	{
+		"coin_25",
+		NULL, // pickup
+		NULL,
+		NULL, // drop
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/coin_025/tris.md2", EF_ROTATE, 
+		NULL,
+/* icon */		"a_shells",
+/* pickup */	"Coin $25",
+/* width */		3,
+		10,
+		NULL,
+		IT_COIN,
+		0,
+		NULL,
+		COIN_25,
+/* precache */ ""
+	},
+
+
+
+
+
+
+
+
+
+
+
 
 
 	//
