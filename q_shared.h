@@ -990,6 +990,13 @@ typedef enum
 #define STAT_CHASE				16
 #define STAT_SPECTATOR			17
 
+// aroth
+#define STAT_CASH_IN_HAND		20
+#define	STAT_CASH_IN_BOX		21
+#define	STAT_CASH_STOLEN		22
+#define	STAT_ROBBERIES			23
+#define	STAT_MAKE_IT_RAIN		24
+
 #define	MAX_STATS				32
 
 

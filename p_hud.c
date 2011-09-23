@@ -164,7 +164,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || game.clients[i].resp.spectator)
 			continue;
-		score = game.clients[i].resp.score;
+		score = ( game.clients[i].cash_in_hand + game.clients[i].resp.cash_in_box );
 		for (j=0 ; j<total ; j++)
 		{
 			if (score > sortedscores[j])
@@ -217,9 +217,10 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		}
 
 		// send the layout
+		// aroth: score = cash in hand + cash in box
 		Com_sprintf (entry, sizeof(entry),
 			"client %i %i %i %i %i %i ",
-			x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe)/600);
+			x, y, sorted[i], ( cl->resp.score ), cl->ping, (level.framenum - cl->resp.enterframe)/600);
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;
@@ -488,6 +489,12 @@ void G_SetStats (edict_t *ent)
 	// frags
 	//
 	ent->client->ps.stats[STAT_FRAGS] = ent->client->resp.score;
+	
+	//
+	// aroth: cashbox stats
+	//
+	ent->client->ps.stats[STAT_CASH_IN_HAND] = ent->client->cash_in_hand;
+	ent->client->ps.stats[STAT_CASH_IN_BOX]  = ent->client->resp.cash_in_box;
 
 	//
 	// help icon / current weapon if not shown

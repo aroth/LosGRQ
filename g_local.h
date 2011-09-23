@@ -853,6 +853,15 @@ typedef struct
 	int			enterframe;			// level.framenum the client entered the game
 	int			score;				// frags, etc
 	vec3_t		cmd_angles;			// angles sent over in the last command
+	
+	// aroth
+	int			cash_in_box;
+	int			cash_stolen;
+	int			cash_found;
+	int			robberies;
+	int			rainmakers;
+
+	qboolean	has_cashbox;
 
 	qboolean	spectator;			// client is a spectator
 } client_respawn_t;
@@ -941,6 +950,9 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
+
+	int			cash_in_hand;
+	
 };
 
 

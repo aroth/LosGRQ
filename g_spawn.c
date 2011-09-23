@@ -761,8 +761,17 @@ char *dm_statusbar =
   "xv 64 "
   "stat_string 16 "
 "endif "
-;
 
+
+// aroth: grq hud
+"xr -50 "
+"yt 42 "
+"num 3 20 " // cash in hand
+
+"xr -50 "
+"yt 82 "
+"num 3 21 " // cash in box
+;
 
 /*QUAKED worldspawn (0 0 0) ?
 
