@@ -697,7 +697,9 @@ void SV_Physics_Toss (edict_t *ent)
 
 	if (trace.fraction < 1)
 	{
-		if (ent->movetype == MOVETYPE_BOUNCE)
+		if( ent->movetype == MOVETYPE_FLYRICOCHET )
+			backoff = 1.65;
+		else if (ent->movetype == MOVETYPE_BOUNCE)
 			backoff = 1.5;
 		else
 			backoff = 1;
@@ -705,7 +707,7 @@ void SV_Physics_Toss (edict_t *ent)
 		ClipVelocity (ent->velocity, trace.plane.normal, ent->velocity, backoff);
 
 	// stop if on ground
-		if (trace.plane.normal[2] > 0.7)
+		if (trace.plane.normal[2] > 0.7 && ent->movetype != MOVETYPE_FLYRICOCHET)
 		{		
 			if (ent->velocity[2] < 60 || ent->movetype != MOVETYPE_BOUNCE )
 			{
@@ -934,6 +936,7 @@ void G_RunEntity (edict_t *ent)
 	case MOVETYPE_BOUNCE:
 	case MOVETYPE_FLY:
 	case MOVETYPE_FLYMISSILE:
+	case MOVETYPE_FLYRICOCHET:
 		SV_Physics_Toss (ent);
 		break;
 	default:
