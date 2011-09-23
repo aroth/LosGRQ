@@ -32,8 +32,10 @@ void cashbox_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 
 void cashbox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point){
 	if( attacker->client ){
-		gi.centerprintf(attacker, "%s has raided %s's cashbox!", attacker->client->pers.netname, self->goalentity->client->pers.netname);
-		
+		// Print messages
+		gi.bprintf(PRINT_MEDIUM, "%s has raided %s's cashbox!", attacker->client->pers.netname, self->goalentity->client->pers.netname);
+		gi.centerprintf(self->goalentity, "%s has raided your cashbox!", attacker->client->pers.netname);
+		gi.centerprintf(attacker, "You have raided %s's cashbox!", self->goalentity->client->pers.netname);
 		
 		attacker->client->cash_in_hand = self->goalentity->client->resp.cash_in_box;  // exchange funds
 		self->goalentity->client->resp.has_cashbox = true;							   // return cashbox to victim
@@ -57,8 +59,8 @@ void cashbox_think( edict_t *ent ){
 	while ((e = findradius(e, ent->s.origin, radius)) != NULL){
 		if( e->client ){
 			// TODO: cant attack own cashbox
-			if ( ((e->client->latched_buttons|e->client->buttons) & BUTTON_ATTACK) && e->client->pers.weapon->weapmodel == WEAP_BLASTER){
-				gi.centerprintf( e, "%s is attacking your box! (%d)", e->client->pers.netname, ent->health);
+			if ( ((e->client->latched_buttons|e->client->buttons) & BUTTON_ATTACK) && e->client->pers.weapon->weapmodel == WEAP_BLASTER && (e->client != ent->goalentity->client) ){
+				gi.centerprintf( ent->goalentity, "%s is raiding your cashbox!", e->client->pers.netname, ent->health);
 				ent->health -= 5;
 			}
 
@@ -92,7 +94,7 @@ void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		if( ent->goalentity == other ){
 			gi.bprintf(PRINT_MEDIUM, "%s recovered his own cash.\n", other->client->pers.netname);
 		}else{
-			ent->client->resp.cash_stolen +=1; // track steals
+			other->client->resp.cash_stolen +=1; // track steals
 			gi.bprintf(PRINT_MEDIUM, "%s accepted %s's spare change.\n", other->client->pers.netname, ent->goalentity->client->pers.netname);
 			//ent->goalentity = other; // change ownership
 		}
