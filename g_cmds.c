@@ -972,6 +972,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_CashOut(ent);
 	else if( Q_stricmp(cmd, "cashbox") == 0)
 		Cmd_Cashbox(ent);
+	else if( Q_stricmp(cmd, "givecash") == 0)
+		Cmd_GiveCash(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

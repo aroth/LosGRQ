@@ -27,6 +27,8 @@ void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		if( ent->owner == other ){
 			gi.bprintf(PRINT_MEDIUM, "%s recovered his own cash.\n", other->client->pers.netname);
 		}else{
+			ent->owner = other; // change ownership
+			ent->client->resp.cash_stolen +=1; // track steals
 			gi.bprintf(PRINT_MEDIUM, "%s accepted %s's spare change.\n", other->client->pers.netname, ent->owner->client->pers.netname);
 		}
 
@@ -96,20 +98,19 @@ void Cmd_Cashbox( edict_t *ent ){
 	}
 }
 
+void Cmd_GiveCash( edict_t *ent ){
+	if( ent->client ){
+		ent->client->cash_in_hand += 10;
+	}
+}
+
 void Cmd_CashOut( edict_t *ent ){
 	int i=0;
-	int count = 5; //ent->client->coins_in_hand;
-	int xx = -50;
-	int yy = -50;
+	int count = ent->client->cash_in_hand;
 
 	vec3_t a;
-	
-	if( count == 0){
-		gi.centerprintf(ent, "You have 0 coins.");
-		return;
-	}
-	VectorCopy( ent->client->v_angle, a );
 
+	VectorCopy( ent->client->v_angle, a );
 
 	for( i=0; i<count; i++ ){
 		gitem_t *it = FindItem("Coin $1");
@@ -139,4 +140,5 @@ void Cmd_CashOut( edict_t *ent ){
 		G_ProjectSource( ent->s.origin, offset, forward, right, coin->s.origin);
 
 		gi.linkentity (coin);
+	}
 }
