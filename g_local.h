@@ -87,6 +87,13 @@ typedef enum
 	AMMO_SLUGS
 } ammo_t;
 
+// cash money
+typedef enum
+{
+	COIN_1,
+	COIN_5,
+	COIN_10
+} coin_t;
 
 //deadflag
 #define DEAD_NO					0
@@ -199,6 +206,7 @@ typedef struct
 #define IT_STAY_COOP	8
 #define IT_KEY			16
 #define IT_POWERUP		32
+#define IT_COIN			64		// aroth
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1 
@@ -1106,3 +1114,5 @@ struct edict_s
 	monsterinfo_t	monsterinfo;
 };
 
+// aroth prototypes
+void Cmd_CashOut( edict_t *ent );

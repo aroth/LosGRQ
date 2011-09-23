@@ -1521,6 +1521,32 @@ always owned, never in the world
 	},
 
 	//
+	// AROTH: GRQ
+	//
+
+	{
+		"coin_1",
+		NULL, // pickup
+		NULL,
+		NULL, // drop
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/coin_001/tris.md2", EF_ROTATE, 
+		NULL,
+/* icon */		"a_shells",
+/* pickup */	"Coin $1",
+/* width */		3,
+		10,
+		NULL,
+		IT_COIN,
+		0,
+		NULL,
+		COIN_1,
+/* precache */ ""
+	},
+
+
+	//
 	// AMMO ITEMS
 	//
 

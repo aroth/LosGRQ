@@ -23,7 +23,6 @@ void Cmd_CashOut( edict_t *ent ){
 		gi.centerprintf(ent, "You have 0 coins.");
 		return;
 	}
-
 	VectorCopy( ent->client->v_angle, a );
 
 	for( i=0; i<count; i++ ){
