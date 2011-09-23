@@ -1,6 +1,20 @@
 #include "g_local.h"
 
+
 void cashbox_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf){
+	
+	if( ent->goalentity == other ){
+		// TODO: prevent flooding of these messages
+		gi.centerprintf(other, "Your cashbox has $%d", other->client->resp.cash_in_box);
+	}else{
+		gi.centerprintf(other, "You have found %s's cashbox!", ent->goalentity->client->pers.netname);
+	}
+
+	//if( other->client ){
+//		gi.centerprintf( other, "You have found %s's cashbox.", ent->goalentity->client->pers.netname);		
+//	}
+
+	/*
 	if( other == ent->owner ){
 		return;
 	}
@@ -11,14 +25,56 @@ void cashbox_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 		ent->movetype = MOVETYPE_NONE;
 	}
 	return;
+*/
+	
+}
+
+
+void cashbox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point){
+	if( attacker->client ){
+		gi.centerprintf(attacker, "%s has raided %s's cashbox!", attacker->client->pers.netname, self->goalentity->client->pers.netname);
+		
+		
+		attacker->client->cash_in_hand = self->goalentity->client->resp.cash_in_box;  // exchange funds
+		self->goalentity->client->resp.has_cashbox = true;							   // return cashbox to victim
+		self->goalentity->client->resp.cash_in_box = 0;								   // ...empty
+
+	
+	}else{ 
+		// lava? slime? 
+		gi.dprintf("Cashbox died in another way. Handle this. with %s", attacker->classname); //TODO
+	}
+
+	gi.unlinkentity( self );
+	G_FreeEdict( self );
 }
 
 void cashbox_think( edict_t *ent ){
-	ent->nextthink = level.time + 0.1;
+
+	float radius = 64.0;
+	edict_t *e = NULL;
+
+	while ((e = findradius(e, ent->s.origin, radius)) != NULL){
+		if( e->client ){
+			// TODO: cant attack own cashbox
+			if ( ((e->client->latched_buttons|e->client->buttons) & BUTTON_ATTACK) && e->client->pers.weapon->weapmodel == WEAP_BLASTER){
+				gi.centerprintf( e, "%s is attacking your box! (%d)", e->client->pers.netname, ent->health);
+				ent->health -= 5;
+			}
+
+		}
+	}
+
+	if( ent->health < 100 ){
+		ent->health += 5;
+	}
+
+	ent->nextthink = level.time + 0.2;
 }
 
 
 void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf){
+
 	if( other->client ){
 		gi.sound(ent, CHAN_ITEM, gi.soundindex("coin/chching1.wav"), 1, ATTN_NORM, 0);
 
@@ -33,12 +89,12 @@ void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		
 
 		// aroth: this will be too frequent if there are a lot of coins. ok for now.
-		if( ent->owner == other ){
+		if( ent->goalentity == other ){
 			gi.bprintf(PRINT_MEDIUM, "%s recovered his own cash.\n", other->client->pers.netname);
 		}else{
-			ent->owner = other; // change ownership
 			ent->client->resp.cash_stolen +=1; // track steals
-			gi.bprintf(PRINT_MEDIUM, "%s accepted %s's spare change.\n", other->client->pers.netname, ent->owner->client->pers.netname);
+			gi.bprintf(PRINT_MEDIUM, "%s accepted %s's spare change.\n", other->client->pers.netname, ent->goalentity->client->pers.netname);
+			//ent->goalentity = other; // change ownership
 		}
 
 		gi.unlinkentity( ent );
@@ -59,27 +115,38 @@ void Cmd_Cashbox( edict_t *ent ){
 
 		edict_t *cashbox = G_Spawn();
 
-		cashbox->owner = ent;
-		cashbox->spawnflags = DROPPED_ITEM;
+		//cashbox->spawnflags = DROPPED_ITEM;
 		cashbox->classname = "cashbox";
-		cashbox->s.modelindex = gi.modelindex("models/items/box_red/tris.md2");
+		cashbox->s.modelindex = gi.modelindex("models/objects/bomb/tris.md2");
 		cashbox->s.skinnum = 0;
+		cashbox->mass = 400;
+		cashbox->health = 120;
+		cashbox->takedamage = DAMAGE_YES;
 		cashbox->movetype = MOVETYPE_TOSS;
-		cashbox->clipmask = MASK_SOLID;
+		cashbox->clipmask = MASK_SHOT;
 		cashbox->solid = SOLID_BBOX;
+		cashbox->owner = world;
+		cashbox->die = cashbox_die;
+		cashbox->goalentity = ent;
+		cashbox->touch = cashbox_touch;
+		cashbox->think = cashbox_think;
+		cashbox->nextthink = level.time + 1;
 
 		VectorSet( cashbox->mins, -15, -15, -15 );
-		VectorSet( cashbox->maxs, 15, 15, 15 );
+		VectorSet( cashbox->maxs, 15, 15 , 15 );
 
 		AngleVectors( client->v_angle, forward, right, NULL );
+
+		cashbox->s.angles[1] = 0;
+		cashbox->s.angles[0] = 0;
+		cashbox->s.angles[2] = 0;
+
 		VectorSet( offset, 0, 0, 0 );
 		G_ProjectSource( ent->s.origin, offset, forward, right, cashbox->s.origin );
 		VectorScale( forward, 200, cashbox->velocity );
 		cashbox->velocity[2] = 100;
 
-		cashbox->think = cashbox_think;
-		cashbox->nextthink = level.time + 0.1;
-		cashbox->touch = cashbox_touch;
+		cashbox->s.origin[2] += 40;
 
 		gi.linkentity( cashbox );
 
@@ -93,7 +160,7 @@ void Cmd_Cashbox( edict_t *ent ){
 		float radius = 64.0;
 		edict_t *e = NULL;
 		while ((e = findradius(e, ent->s.origin, radius)) != NULL){
-			if( strcmp( e->classname, "cashbox") == 0 && e->owner == ent ){
+			if( strcmp( e->classname, "cashbox") == 0 && e->goalentity == ent ){
 				gi.unlinkentity( e );
 				G_FreeEdict( e );
 				gi.centerprintf(ent, "Picked up cashbox...");
@@ -127,11 +194,13 @@ void throw_cash( edict_t *ent, gitem_t *it, vec3_t angle ){
 		VectorSet( coin->mins, -15, -15, -15 );
 		VectorSet( coin->maxs, 15, 15, 15 );
 		gi.setmodel( coin, coin->item->world_model);
-		coin->solid = SOLID_TRIGGER;
+		coin->solid = SOLID_BBOX;
 		coin->takedamage = DAMAGE_YES;
+		coin->clipmask = MASK_SHOT;
 		coin->movetype = MOVETYPE_FLYRICOCHET;
+		coin->owner = world;
+		coin->goalentity = ent;
 		coin->touch = coin_touch;
-		coin->owner = ent;
 
 		AngleVectors(angle, forward, right, NULL);
 		VectorSet( offset, 0, 48, 48 );

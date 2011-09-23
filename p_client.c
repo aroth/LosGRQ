@@ -1275,6 +1275,10 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	// start with cashbox
 	ent->client->resp.has_cashbox = true;
+	ent->client->resp.cash_found = 0;
+	ent->client->resp.cash_in_box = 0;
+	ent->client->resp.cash_stolen = 0;
+	ent->client->resp.rainmakers = 0;
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
