@@ -1126,3 +1126,4 @@ void Cmd_CashOut( edict_t *ent );
 void Cmd_Cashbox( edict_t *ent );
 void Cmd_GiveCash( edict_t *ent ); // debug
 void makeChange( edict_t *ent );
+void SpawnCoin( edict_t *ent );

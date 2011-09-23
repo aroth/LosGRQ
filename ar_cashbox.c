@@ -78,6 +78,9 @@ void cashbox_think( edict_t *ent ){
 void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf){
 
 	if( other->client ){
+
+		ent->goalentity = other;
+
 		gi.sound(ent, CHAN_ITEM, gi.soundindex("coin/chching1.wav"), 1, ATTN_NORM, 0);
 
 		if( Q_stricmp( ent->classname, "coin_1" ) == 0 )
@@ -209,6 +212,38 @@ void throw_cash( edict_t *ent, gitem_t *it, vec3_t angle ){
 		G_ProjectSource( ent->s.origin, offset, forward, right, coin->s.origin);
 
 		gi.linkentity (coin);
+}
+
+
+void SpawnCoin( edict_t *ent ){
+
+	gitem_t *it = FindItem("Coin $5");
+	edict_t *coin = G_Spawn();
+	vec3_t forward, right, offset;
+
+	coin->classname = it->classname;
+	coin->item = it;
+	coin->mass = 50.0;
+	coin->spawnflags = DROPPED_ITEM;
+	coin->health = 99999;
+	coin->s.effects = it->world_model_flags;
+	coin->s.renderfx = RF_GLOW;
+	VectorSet( coin->mins, -15, -15, -15 );
+	VectorSet( coin->maxs, 15, 15, 15 );
+	gi.setmodel( coin, coin->item->world_model);
+	coin->solid = SOLID_BBOX;
+	coin->takedamage = DAMAGE_YES;
+	coin->clipmask = MASK_SHOT;
+	coin->movetype = MOVETYPE_FLYRICOCHET;
+	coin->owner = world;
+	//coin->goalentity = ent->client;
+	coin->touch = coin_touch;
+
+	//AngleVectors(angle, forward, right, NULL);
+	VectorSet( offset, 0, 48, 48 );
+	G_ProjectSource( ent->s.origin, offset, forward, right, coin->s.origin);
+
+	gi.linkentity (coin);
 }
 
 void Cmd_CashOut( edict_t *ent ){

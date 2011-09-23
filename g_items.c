@@ -120,6 +120,8 @@ void DoRespawn (edict_t *ent)
 	ent->solid = SOLID_TRIGGER;
 	gi.linkentity (ent);
 
+	SpawnCoin(ent);
+	
 	// send an effect
 	ent->s.event = EV_ITEM_RESPAWN;
 }
