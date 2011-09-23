@@ -1270,6 +1270,9 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
+	// start with cashbox
+	ent->client->resp.has_cashbox = true;
+
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
 }

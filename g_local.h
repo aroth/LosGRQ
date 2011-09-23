@@ -1116,3 +1116,4 @@ struct edict_s
 
 // aroth prototypes
 void Cmd_CashOut( edict_t *ent );
+void Cmd_Cashbox( edict_t *ent );

@@ -165,6 +165,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		if (!cl_ent->inuse || game.clients[i].resp.spectator)
 			continue;
 		score = ( game.clients[i].cash_in_hand + game.clients[i].resp.cash_in_box );
+		game.clients[i].resp.score = score;
 		for (j=0 ; j<total ; j++)
 		{
 			if (score > sortedscores[j])

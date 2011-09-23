@@ -1,22 +1,107 @@
 #include "g_local.h"
 
 void cashbox_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf){
+	if( other == ent->owner ){
+		return;
+	}
+	if (!other->takedamage)
+	{
+		VectorClear(ent->velocity);
+		VectorClear(ent->avelocity);
+		ent->movetype = MOVETYPE_NONE;
+	}
+	return;
 }
 
 void cashbox_think( edict_t *ent ){
-
+	ent->nextthink = level.time + 0.1;
 }
 
+
 void coin_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf){
+	if( other->client ){
+		gi.sound(ent, CHAN_ITEM, gi.soundindex("coin/chching1.wav"), 1, ATTN_NORM, 0);
+		other->client->cash_in_hand += 1;
+		
+		// aroth: this will be too frequent if there are a lot of coins. ok for now.
+		if( ent->owner == other ){
+			gi.bprintf(PRINT_MEDIUM, "%s recovered his own cash.\n", other->client->pers.netname);
+		}else{
+			gi.bprintf(PRINT_MEDIUM, "%s accepted %s's spare change.\n", other->client->pers.netname, ent->owner->client->pers.netname);
+		}
+
+		gi.unlinkentity( ent );
+		G_FreeEdict( ent );
+	}
 }
 
 void coin_think( edict_t *ent ){
+}
 
+
+void Cmd_Cashbox( edict_t *ent ){
+	gclient_t *client = ent->client;
+	gi.centerprintf( ent, "HAS CASHBOX? %d", client->resp.has_cashbox);
+	if( client->resp.has_cashbox == true ){
+		
+		vec3_t forward, right, offset;	
+		trace_t tr;
+
+		edict_t *cashbox = G_Spawn();
+
+		cashbox->owner = ent;
+		cashbox->spawnflags = DROPPED_ITEM;
+		cashbox->classname = "cashbox";
+		cashbox->s.modelindex = gi.modelindex("models/items/box_red/tris.md2");
+		cashbox->s.skinnum = 0;
+		cashbox->movetype = MOVETYPE_TOSS;
+		cashbox->clipmask = MASK_SOLID;
+		cashbox->solid = SOLID_BBOX;
+
+		VectorSet( cashbox->mins, -15, -15, -15 );
+		VectorSet( cashbox->maxs, 15, 15, 15 );
+
+		AngleVectors( client->v_angle, forward, right, NULL );
+		VectorSet( offset, 0, 0, 0 );
+		G_ProjectSource( ent->s.origin, offset, forward, right, cashbox->s.origin );
+		VectorScale( forward, 200, cashbox->velocity );
+		cashbox->velocity[2] = 100;
+
+		cashbox->think = cashbox_think;
+		cashbox->nextthink = level.time + 0.1;
+		cashbox->touch = cashbox_touch;
+
+		gi.linkentity( cashbox );
+
+		client->resp.cash_in_box += client->cash_in_hand;
+		client->cash_in_hand = 0;
+		
+		gi.centerprintf(ent, "Dropped cashbox...");
+		client->resp.has_cashbox = false;
+	}else{
+		
+		float radius = 64.0;
+		edict_t *e = NULL;
+		while ((e = findradius(e, ent->s.origin, radius)) != NULL){
+			if( strcmp( e->classname, "cashbox") == 0 && e->owner == ent ){
+				gi.unlinkentity( e );
+				G_FreeEdict( e );
+				gi.centerprintf(ent, "Picked up cashbox...");
+				client->resp.has_cashbox = true;
+				client->cash_in_hand += client->resp.cash_in_box;
+				client->resp.cash_in_box = 0;
+				break;
+			}
+		}
+	}
 }
 
 void Cmd_CashOut( edict_t *ent ){
 	int i=0;
 	int count = 5; //ent->client->coins_in_hand;
+	int xx = -50;
+	int yy = -50;
+
 	vec3_t a;
 	
 	if( count == 0){
@@ -25,6 +110,7 @@ void Cmd_CashOut( edict_t *ent ){
 	}
 	VectorCopy( ent->client->v_angle, a );
 
+
 	for( i=0; i<count; i++ ){
 		gitem_t *it = FindItem("Coin $1");
 		edict_t *coin = G_Spawn();
@@ -32,7 +118,7 @@ void Cmd_CashOut( edict_t *ent ){
 
 		coin->classname = it->classname;
 		coin->item = it;
-		coin->mass = 10.0;
+		coin->mass = 50.0;
 		coin->spawnflags = DROPPED_ITEM;
 		coin->health = 99999;
 		coin->s.effects = it->world_model_flags;
@@ -40,34 +126,17 @@ void Cmd_CashOut( edict_t *ent ){
 		VectorSet( coin->mins, -15, -15, -15 );
 		VectorSet( coin->maxs, 15, 15, 15 );
 		gi.setmodel( coin, coin->item->world_model);
-		coin->solid = SOLID_TRIGGER; // SOLID_TRIGGER;
+		coin->solid = SOLID_TRIGGER;
 		coin->takedamage = DAMAGE_YES;
 		coin->movetype = MOVETYPE_FLYRICOCHET;
-		coin->touch = coin_touch; //drop_temp_touch;
+		coin->touch = coin_touch;
 		coin->owner = ent;
 
 		a[1] += (360 / count);
 
-		if (ent->client)
-		{
-			trace_t	trace;
-
-			AngleVectors (a, forward, right, NULL);
-			VectorSet(offset, 24, 0, -16);
-			G_ProjectSource (ent->s.origin, offset, forward, right, coin->s.origin);
-			trace = gi.trace (ent->s.origin, coin->mins, coin->maxs, coin->s.origin, ent, CONTENTS_SOLID);
-			VectorCopy (trace.endpos, coin->s.origin);
-
-			coin->s.origin[2] += 300;
-//			VectorScale( forward, 20 + (i*5), coin->velocity );
-		}
-
-		coin->nextthink = level.time + 3; // wait 3 sec?
-		coin->think =  coin_think; //coin_touch; //sdrop_make_touchable;
+		AngleVectors(a, forward, right, NULL);
+		VectorSet( offset, 0, 48, 48 );
+		G_ProjectSource( ent->s.origin, offset, forward, right, coin->s.origin);
 
 		gi.linkentity (coin);
-	//ent->client->coins_in_hand -= 1;
-
-	}
-//	return dropped;
 }
