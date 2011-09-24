@@ -741,10 +741,6 @@ char *dm_statusbar =
 "	pic	11 "
 "endif "
 
-//  frags
-"xr	-50 "
-"yt 2 "
-"num 3 14 "
 
 // spectator
 "if 17 "
@@ -763,14 +759,32 @@ char *dm_statusbar =
 "endif "
 
 
+//  frags
+//"xr	-50 "
+//"yt 2 "
+//"num 3 14 "
+
+
 // aroth: grq hud
 "xr -50 "
-"yt 42 "
+"yt 12 "
 "num 3 20 " // cash in hand
 
+"xr -99 "
+"yt 2 "
+"string \"Cash In Hand\" "
+
+
 "xr -50 "
-"yt 82 "
+"yt 52 "
 "num 3 21 " // cash in box
+
+
+"xr -91 "
+"yt 42 "
+"string \"Cash In Box\" "
+
+
 ;
 
 /*QUAKED worldspawn (0 0 0) ?

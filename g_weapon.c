@@ -601,6 +601,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
 {
 	edict_t	*rocket;
+	edict_t *rocket2;
 
 	rocket = G_Spawn();
 	VectorCopy (start, rocket->s.origin);
@@ -613,7 +614,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->s.effects |= EF_ROCKET;
 	VectorClear (rocket->mins);
 	VectorClear (rocket->maxs);
-	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
+	rocket->s.modelindex = gi.modelindex("models/objects/bomb/tris.md2");
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
 	rocket->nextthink = level.time + 8000/speed;
@@ -628,6 +629,38 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 		check_dodge (self, rocket->s.origin, dir, speed);
 
 	gi.linkentity (rocket);
+
+		/*
+	// rocket 2
+
+	rocket2 = G_Spawn();
+	VectorCopy (start, rocket2->s.origin);
+	VectorCopy (dir, rocket2->movedir);
+	vectoangles (dir, rocket2->s.angles);
+	VectorScale (dir, speed - 100, rocket2->velocity);
+	rocket2->movetype = MOVETYPE_FLYMISSILE;
+	rocket2->clipmask = MASK_SHOT;
+	rocket2->solid = SOLID_BBOX;
+	rocket2->s.effects |= EF_ROCKET;
+	VectorClear (rocket2->mins);
+	VectorClear (rocket2->maxs);
+	rocket2->s.modelindex = gi.modelindex("models/objects/bomb/tris.md2");
+	rocket2->owner = self;
+	rocket2->touch = rocket_touch;
+	rocket2->nextthink = level.time + 8000/speed;
+	rocket2->think = G_FreeEdict;
+	rocket2->dmg = damage;
+	rocket2->radius_dmg = radius_damage;
+	rocket2->dmg_radius = damage_radius;
+	rocket2->s.sound = gi.soundindex ("weapons/rockfly.wav");
+	rocket2->classname = "rocket";
+
+	if (self->client)
+		check_dodge (self, rocket2->s.origin, dir, speed);
+
+	gi.linkentity (rocket2);
+	*/
+
 }
 
 

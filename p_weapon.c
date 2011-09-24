@@ -317,6 +317,11 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	}
 
 	// change to this weapon when down
+	if( ent->client->cash_in_hand >= ( item->weapmodel * 50 ) ){
+		//gi.centerprintf(ent, "Buy upgrade for %i, press B.", ( item->weapmodel * 50 ) );
+	}else{
+		//gi.centerprintf(ent, "Using %s, collect %d to upgrade.", item->classname, ( item->weapmodel * 50 ) );
+	}
 	ent->client->newweapon = item;
 }
 

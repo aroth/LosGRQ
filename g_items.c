@@ -118,12 +118,19 @@ void DoRespawn (edict_t *ent)
 
 	ent->svflags &= ~SVF_NOCLIENT;
 	ent->solid = SOLID_TRIGGER;
-	gi.linkentity (ent);
 
-	SpawnCoin(ent);
-	
+	if( SpawnCoin(ent) ){
+		// coin spawed
+		gi.dprintf("spawned coin...");
+	}else{
+		//gi.dprintf("spanwed item...");
+	}
+
+	gi.linkentity (ent);
 	// send an effect
 	ent->s.event = EV_ITEM_RESPAWN;
+
+
 }
 
 void SetRespawn (edict_t *ent, float delay)
